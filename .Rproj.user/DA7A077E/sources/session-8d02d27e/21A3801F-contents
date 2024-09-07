@@ -1,0 +1,5 @@
+#' filter_words
+#'
+filter_words <- function(l1, l2, l3, l4, l5, words) {
+  browser()
+}

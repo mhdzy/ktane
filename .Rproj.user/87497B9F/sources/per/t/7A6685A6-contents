@@ -1,0 +1,91 @@
+library(googlesheets4)
+
+sheet <- "https://docs.google.com/spreadsheets/d/1ab0ApJhgpBXSPUWqcvh_cagFdO4pIo-mWJsWtfLjl-w/"
+
+tbls <- c("ascension", "descension") |>
+  lapply(\(x) googlesheets4::read_sheet(ss = sheet, sheet = x)) |>
+  lapply(\(x) {x$result <- unlist(x$result); x}) |>
+  dplyr::bind_rows() |>
+  na.omit() %>%
+  dplyr::mutate(
+    seq_id = 1:nrow(.)
+  )
+
+rolling_total <- 1
+
+pic_folder <- "~/Documents/fiks/combined/"
+og_pic_filenames <- list.files(pic_folder)
+og_pic_split <- og_pic_filenames |> strsplit("\\.")
+og_pic_ids <- og_pic_split |> purrr::map(1)
+
+file_ext <- tibble::tibble(
+  photo_no = as.double(unlist(purrr::map(og_pic_split, 1))),
+  ext = unlist(purrr::map(og_pic_split, 2))
+) |>
+  na.omit()
+
+whole_df <- dplyr::left_join(
+  tbls, file_ext, by = c("photo no" = "photo_no")
+) |>
+  dplyr::mutate(
+    current_path = paste0(`photo no`, ".", ext),
+    future_path = paste0(seq_id, "-", `slide no`, "-", `photo no`, ".", ext)
+  )
+
+cmd_df <- whole_df |>
+  dplyr::select(current_path, future_path) |>
+  dplyr::mutate(
+    src = paste0("~/Documents/fiks/combined/", current_path),
+    dest = paste0("~/Documents/fiks/mpix/", future_path)
+  )
+
+commands <- paste("cp", cmd_df$src, cmd_df$dest)
+
+for (cmd in commands) {
+  system(cmd)
+}
+
+# we now need to cast non-jpeg files as jpg using imagemagick
+# we can use a simple bash program for this
+formats <- c(
+  ".tif",
+  ".nef",
+  ".HEIC",
+  ".heic"
+)
+
+cwd <- getwd()
+setwd("~/Documents/fiks/mpix/")
+for (fmt in formats) {
+  bash <- paste0('for f in *', fmt, ';
+do
+  echo "converting $f";
+  magick convert "$f" "$(basename "$f" ', fmt, ').jpg";
+done;
+rm -f *', fmt, ';
+'
+  )
+
+  system(bash)
+}
+
+  setwd(cwd)
+
+
+
+# use the below for checking final outputs
+used_pic_idx <- which(og_pic_ids %in% tbls$`photo no`)
+# used to index final output table for used 'photo no'
+used_pic_ids <- og_pic_ids[used_pic_idx]
+used_pic_names <- og_pic_filenames[used_pic_idx]
+new_pic_names <- paste0(tbls$`slide no`, "-", seq_along(tbls$`slide no`), "-", og_pic_filenames)
+new_pic_names <- new_pic_names[used_pic_idx]
+new_pic_names
+
+# scratch work
+t <- tibble(
+  category = tbls$`slide no`[used_pic_idx],
+  idx = used_pic_idx,
+  ids = unlist(used_pic_ids),
+  names = used_pic_names
+)

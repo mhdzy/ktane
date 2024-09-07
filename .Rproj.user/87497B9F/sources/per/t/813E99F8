@@ -1,0 +1,24 @@
+{
+    "id": "813E99F8",
+    "path": "~/code/ktane/modules/input_module.R",
+    "project_path": "modules/input_module.R",
+    "type": "r_source",
+    "hash": "4237896554",
+    "contents": "",
+    "dirty": false,
+    "created": 1716422593636.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1716339760,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1716339760,
+    "read_only": false,
+    "read_only_alternatives": []
+}
