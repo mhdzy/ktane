@@ -1,0 +1,19 @@
+letter_ui <- function(id, value = "") {
+  ns <- NS(id)
+
+  tagList(
+    shiny::textInput(
+      inputId = ns(id),
+      label = id,
+      value = value
+    )
+  )
+}
+
+letter_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    return(
+      reactive(input[[id]])
+    )
+  })
+}

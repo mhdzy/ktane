@@ -1,0 +1,13 @@
+path <- "~/Documents/combined"
+setwd(path)
+
+old <- list.files(path)
+ext <- unlist(purrr::map(strsplit(old, "\\."), 2))
+
+for (fid in seq_along(old)) {
+  id = fid
+  ex = ext[fid]
+  file = old[fid]
+  command = paste0('mv "', file,'" ' , id, ".", ex)
+  system(command)
+}
